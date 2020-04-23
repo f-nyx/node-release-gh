@@ -60,8 +60,7 @@ async function resolveNextSemver({ currentRef, owner, repo }) {
  * root module version. It does not create git tags, it just bumps versions and stage all
  * changes.
  */
-function bumpModules(nextVersion) {
-  const workingDir = __dirname;
+function bumpModules({ workingDir, nextVersion }) {
   const modules = readdirSync(workingDir, { withFileTypes: true }).filter(inode =>
     inode.isDirectory() && existsSync(join(workingDir, inode.name, 'package.json'))
   ).map(inode =>
@@ -74,6 +73,7 @@ function bumpModules(nextVersion) {
     exec(`npm version ${nextVersion} --no-git-tag-version`)
   });
 
+  shell.cd(workingDir);
   exec(`git add .`);
 }
 
@@ -95,6 +95,7 @@ async function release(args) {
   if (currentRef.indexOf(REFS) === 0) {
     currentRef = currentRef.substr(REFS.length);
   }
+  const workingDir = __dirname;
   const versionBump = await resolveNextSemver({
     currentRef,
     ...args
@@ -102,7 +103,7 @@ async function release(args) {
 
   const nextVersion = semver.inc(baseVersion(), versionBump);
   console.log(`preparing ${versionBump} release: ${nextVersion}`);
-  bumpModules(nextVersion);
+  bumpModules({ workingDir, nextVersion });
 
   const versionResult = exec(`npm version ${versionBump} --force -m 'New release: %s'`);
 
