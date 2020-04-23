@@ -2,7 +2,7 @@ name: Create a new release when a branch is merged into master
 on:
   push:
     branches:
-      - qat
+      - master
 jobs:
   container-job:
     runs-on: ubuntu-latest

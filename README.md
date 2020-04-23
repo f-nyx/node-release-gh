@@ -1,5 +1,7 @@
-# test-release
+# node-release-gh
 
-adding test documentation
+This workflow bumps the project's version when a pull request is merged into master. It uses the standard semver
+convention.
 
-adds more docs
+If the source branch is `develop`, it bumps the minor version. Otherwise, it assumes the source branch is a hotfix
+and it bumps the revision number.
