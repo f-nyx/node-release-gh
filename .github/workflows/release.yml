@@ -1,0 +1,26 @@
+name: Create a new release when a branch is merged into master
+on:
+  push:
+    branches:
+      - qat
+jobs:
+  container-job:
+    runs-on: ubuntu-latest
+    container:
+      image: node:12-alpine
+    steps:
+      - run: |
+          apk update && apk upgrade && \
+              apk add --no-cache git
+      - uses: actions/checkout@v2
+        with:
+          ref: master
+      - name: Prepare the next release
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          npm install
+          npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT_REF: ${{ github.ref }}
