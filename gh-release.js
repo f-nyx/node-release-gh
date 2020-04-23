@@ -104,7 +104,7 @@ async function release(args) {
   console.log(`preparing ${versionBump} release: ${nextVersion}`);
   bumpModules(nextVersion);
 
-  const versionResult = exec(`npm version ${nextVersion} --force -m 'New release: %s'`);
+  const versionResult = exec(`npm version ${versionBump} --force -m 'New release: %s'`);
 
   if (versionResult.code !== 0) {
     console.info('error preparing the release');
