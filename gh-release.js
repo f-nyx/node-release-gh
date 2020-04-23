@@ -120,8 +120,6 @@ async function release(args) {
 }
 
 (async function __init() {
-  console.log(nextVersion);
-  process.exit(0);
   return yargs
     .command('release', 'bumps the project version and tags the new release in git', {
       owner: {
