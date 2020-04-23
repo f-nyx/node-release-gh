@@ -1,3 +1,4 @@
+const semver = require('semver')
 const { Octokit } = require("@octokit/rest");
 const shell = require('shelljs');
 const { readFileSync, readdirSync, existsSync } = require('fs');
@@ -59,9 +60,8 @@ async function resolveNextSemver({ currentRef, owner, repo }) {
  * root module version. It does not create git tags, it just bumps versions and stage all
  * changes.
  */
-function bumpModules() {
+function bumpModules(nextVersion) {
   const workingDir = __dirname;
-  const nextVersion = baseVersion();
   const modules = readdirSync(workingDir, { withFileTypes: true }).filter(inode =>
     inode.isDirectory() && existsSync(join(workingDir, inode.name, 'package.json'))
   ).map(inode =>
@@ -100,10 +100,11 @@ async function release(args) {
     ...args
   });
 
-  console.log(`preparing ${versionBump} release`);
-  bumpModules();
+  const nextVersion = semver.inc(baseVersion(), versionBump);
+  console.log(`preparing ${versionBump} release: ${nextVersion}`);
+  bumpModules(nextVersion);
 
-  const versionResult = exec(`npm version ${versionBump} --force -m 'New release: %s'`);
+  const versionResult = exec(`npm version ${nextVersion} --force -m 'New release: %s'`);
 
   if (versionResult.code !== 0) {
     console.info('error preparing the release');
