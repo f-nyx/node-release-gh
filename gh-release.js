@@ -48,10 +48,6 @@ async function resolveNextSemver({ currentRef, owner, repo }) {
     ref: branchRef.data.object.sha
   });
 
-  if (headCommit.data.committer.login !== GH_COMMITTER) {
-    throw new Error('merge not triggered by github, release is not supported');
-  }
-
   const lastCommit = headCommit.data.commit.message.split("\n").shift();
   const lastCommitRef = lastCommit.substr(-developRef.length);
   const isHotfix = lastCommitRef !== developRef;
