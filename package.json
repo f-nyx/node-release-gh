@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "release": "node gh-release.js release --owner f-nyx --repo node-release-gh",
-    "version": "node gh-release.js bumpModules"
+    "release": "node gh-release.js release --owner f-nyx --repo node-release-gh"
   },
   "repository": {
     "type": "git",
