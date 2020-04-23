@@ -1,23 +1,23 @@
 {
-  "name": "test-release",
+  "name": "node-release-gh",
   "version": "1.3.0",
   "description": "adding test documentation",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "release": "node gh-release.js release --owner f-nyx --repo test-release",
+    "release": "node gh-release.js release --owner f-nyx --repo node-release-gh",
     "version": "node gh-release.js bumpModules"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/f-nyx/test-release.git"
+    "url": "git+https://github.com/f-nyx/node-release-gh.git"
   },
   "author": "",
   "license": "GPL-2.0",
   "bugs": {
-    "url": "https://github.com/f-nyx/test-release/issues"
+    "url": "https://github.com/f-nyx/node-release-gh/issues"
   },
-  "homepage": "https://github.com/f-nyx/test-release#readme",
+  "homepage": "https://github.com/f-nyx/node-release-gh#readme",
   "dependencies": {},
   "devDependencies": {
     "@octokit/rest": "^17.5.2",
