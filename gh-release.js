@@ -90,6 +90,7 @@ async function release(args) {
     console.error(versionResult.stderr);
     process.exit(1);
   } else {
+    console.log(versionResult.stdout);
     console.log(`release prepared successfully, new version is ${baseVersion()}`);
     console.log('pushing new release to github');
     exec('git push && git push --tags');
