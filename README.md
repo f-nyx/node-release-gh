@@ -5,5 +5,3 @@ convention.
 
 If the source branch is `develop`, it bumps the minor version. Otherwise, it assumes the source branch is a hotfix
 and it bumps the revision number.
-
-test1
