@@ -5,7 +5,6 @@ const { readFileSync, readdirSync, existsSync } = require('fs');
 const { join } = require('path');
 const yargs = require('yargs');
 
-const GH_COMMITTER = 'web-flow';
 const REFS = 'refs/';
 
 /** Github client. The GITHUB_TOKEN environment variable must be set.
@@ -26,6 +25,24 @@ function baseVersion() {
   return JSON.parse(readFileSync(join(__dirname, 'package.json'))).version;
 }
 
+/** Retrieves the HEAD commit for a branch.
+ * @return {Promise<object>} the HEAD commit.
+ */
+async function getHead({ currentRef, owner, repo }) {
+  const branchRef = await github.git.getRef({
+    owner,
+    repo,
+    ref: currentRef
+  });
+  const headCommit = await github.repos.getCommit({
+    owner,
+    repo,
+    ref: branchRef.data.object.sha
+  });
+
+  return headCommit.data;
+}
+
 /** Resolves the part of the version (according to semver) that should be bumped.
  *
  * In order to detect whether the last merge comes from the develop branch, it assumes that
@@ -38,22 +55,27 @@ function baseVersion() {
  */
 async function resolveNextSemver({ currentRef, owner, repo }) {
   const developRef = `${owner}/develop`;
-  const branchRef = await github.git.getRef({
-    owner,
-    repo,
-    ref: currentRef
-  });
-  const headCommit = await github.repos.getCommit({
-    owner,
-    repo,
-    ref: branchRef.data.object.sha
-  });
-
-  const lastCommit = headCommit.data.commit.message.split("\n").shift();
+  const headCommit = await getHead({ currentRef, owner, repo });
+  const lastCommit = headCommit.commit.message.split("\n").shift();
   const lastCommitRef = lastCommit.substr(-developRef.length);
   const isHotfix = lastCommitRef !== developRef;
 
   return isHotfix ? 'patch' : 'minor';
+}
+
+/** Determines whether to skip the release.
+ *
+ * It happens when merging from qat into master after a minor release.
+ *
+ * @return {Promise<boolean>} true to skip the release, false otherwise.
+ */
+async function mustSkipRelease({ currentRef, owner, repo }) {
+  const qatRef = `${owner}/qat`;
+  const headCommit = await getHead({ currentRef, owner, repo });
+  const lastCommit = headCommit.commit.message.split("\n").shift();
+  const lastCommitRef = lastCommit.substr(-qatRef.length);
+
+  return lastCommitRef === qatRef;
 }
 
 /** Iterates the subdirectories searching for submodules and bumps the versions up to the
@@ -95,6 +117,21 @@ async function release(args) {
   if (currentRef.indexOf(REFS) === 0) {
     currentRef = currentRef.substr(REFS.length);
   }
+  if (currentRef.indexOf('heads') === -1) {
+    currentRef = `heads/${currentRef}`;
+  }
+
+
+  const skip = await mustSkipRelease({
+    currentRef,
+    ...args
+  });
+
+  if (skip) {
+    console.log('release already made in qat, skipping');
+    return;
+  }
+
   const workingDir = __dirname;
   const versionBump = await resolveNextSemver({
     currentRef,
@@ -114,9 +151,6 @@ async function release(args) {
   } else {
     console.log(versionResult.stdout);
     console.log(`release prepared successfully, new version is ${baseVersion()}`);
-    console.log('pushing new release to github');
-    exec('git push && git push --tags');
-    console.log('release successful');
   }
 }
 
