@@ -6,7 +6,7 @@ on:
       - master
       - qat
 jobs:
-  container-job:
+  release:
     runs-on: ubuntu-latest
     container:
       image: node:12-alpine
@@ -19,6 +19,7 @@ jobs:
           ref: ${{ github.ref }}
         if: github.event.pull_request.merged
       - name: Prepare the next release
+        if: github.event.pull_request.merged
         run: |
           git config user.name $GITHUB_ACTOR
           git config user.email gh-actions-${GITHUB_ACTOR}@github.com
