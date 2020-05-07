@@ -117,6 +117,10 @@ async function release(args) {
   if (currentRef.indexOf(REFS) === 0) {
     currentRef = currentRef.substr(REFS.length);
   }
+  if (currentRef.indexOf('heads') === -1) {
+    currentRef = `heads/${currentRef}`;
+  }
+
 
   const skip = await mustSkipRelease({
     currentRef,
