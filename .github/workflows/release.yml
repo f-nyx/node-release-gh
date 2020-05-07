@@ -1,8 +1,10 @@
 name: Create a new release when a branch is merged into master
 on:
-  push:
+  pull_request:
+    types: closed
     branches:
       - master
+      - qat
 jobs:
   container-job:
     runs-on: ubuntu-latest
@@ -14,13 +16,16 @@ jobs:
               apk add --no-cache git
       - uses: actions/checkout@v2
         with:
-          ref: master
+          ref: ${{ github.ref }}
+        if: github.event.pull_request.merged
       - name: Prepare the next release
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config user.name $GITHUB_ACTOR
+          git config user.email gh-actions-${GITHUB_ACTOR}@github.com
           npm install
           npm run release
+          git remote add gh-origin https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          git push gh-origin ${CURRENT_REF} --tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CURRENT_REF: ${{ github.ref }}
